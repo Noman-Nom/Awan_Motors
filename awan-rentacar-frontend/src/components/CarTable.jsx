@@ -1,41 +1,58 @@
-export default function CarTable({ cars, onEdit, onDelete }) {
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Chip,
+} from '@mui/material';
+
+export default function CarsTable({ cars, onEdit, onDelete }) {
   return (
-    <table className="w-full border">
-      <thead>
-        <tr className="bg-gray-200">
-          <th className="p-2 border">#</th>
-          <th className="p-2 border">Registration No</th>
-          <th className="p-2 border">Model</th>
-          <th className="p-2 border">Status</th>
-          <th className="p-2 border">Remarks</th>
-          <th className="p-2 border">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {cars.map((car, index) => (
-          <tr key={car.registration_no}>
-            <td className="p-2 border">{index + 1}</td>
-            <td className="p-2 border">{car.registration_no}</td>
-            <td className="p-2 border">{car.model}</td>
-            <td className="p-2 border">{car.status}</td>
-            <td className="p-2 border">{car.remarks}</td>
-            <td className="p-2 border">
-              <button
-                onClick={() => onEdit(car)}
-                className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => onDelete(car.registration_no)}
-                className="bg-red-600 text-white px-2 py-1 rounded"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>#</TableCell>
+            <TableCell>Registration No</TableCell>
+            <TableCell>Model</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell>Remarks</TableCell>
+            <TableCell>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {cars.map((car, index) => (
+            <TableRow key={car.registration_no}>
+              <TableCell>{index + 1}</TableCell>
+              <TableCell>{car.registration_no}</TableCell>
+              <TableCell>{car.model}</TableCell>
+              <TableCell>
+                <Chip
+                  label={car.status}
+                  color={car.status === 'Available' ? 'success' : 'error'}
+                  variant="outlined"
+                />
+              </TableCell>
+              <TableCell>{car.remarks}</TableCell>
+              <TableCell>
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  size="small"
+                  onClick={() => onEdit(car)}
+                  sx={{ mr: 1 }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  onClick={() => onDelete(car.registration_no)}
+                >
+                  Delete
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }

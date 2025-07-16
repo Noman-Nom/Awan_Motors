@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { getCars, addCar, updateCar, deleteCar } from '../api/cars';
-import CarForm from '../components/CarForm';
 import CarTable from '../components/CarTable';
+import CarDialog from '../components/CarDialog';
+import { Container, Typography, Button, Box } from '@mui/material';
 
 export default function Cars() {
   const [cars, setCars] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
   const [editingCar, setEditingCar] = useState(null);
-  const [showForm, setShowForm] = useState(false);
 
   const fetchCars = async () => {
     const data = await getCars();
@@ -17,17 +18,15 @@ export default function Cars() {
     fetchCars();
   }, []);
 
-  const handleAdd = async (car) => {
-    await addCar(car);
+  const handleAddEdit = async (car) => {
+    if (editingCar) {
+      await updateCar(editingCar.registration_no, car);
+    } else {
+      await addCar(car);
+    }
     fetchCars();
-    setShowForm(false);
-  };
-
-  const handleUpdate = async (car) => {
-    await updateCar(editingCar.registration_no, car);
+    setOpenDialog(false);
     setEditingCar(null);
-    fetchCars();
-    setShowForm(false);
   };
 
   const handleDelete = async (registration_no) => {
@@ -38,24 +37,34 @@ export default function Cars() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">🚘 Cars Management</h1>
-      <button
-        onClick={() => { setEditingCar(null); setShowForm(true); }}
-        className="bg-blue-600 text-white px-4 py-2 rounded mb-4"
-      >
-        + Add Car
-      </button>
+    <Container>
+      <Box display="flex" justifyContent="space-between" alignItems="center" my={4}>
+        <Typography variant="h4" component="h1">
+          🚘 Cars Management
+        </Typography>
+        <Button variant="contained" color="primary" onClick={() => setOpenDialog(true)}>
+          + Add Car
+        </Button>
+      </Box>
 
-      <CarTable cars={cars} onEdit={(car) => { setEditingCar(car); setShowForm(true); }} onDelete={handleDelete} />
+      <CarTable
+        cars={cars}
+        onEdit={(car) => {
+          setEditingCar(car);
+          setOpenDialog(true);
+        }}
+        onDelete={handleDelete}
+      />
 
-      {showForm && (
-        <CarForm
-          onClose={() => setShowForm(false)}
-          onSubmit={editingCar ? handleUpdate : handleAdd}
-          initialData={editingCar}
-        />
-      )}
-    </div>
+      <CarDialog
+        open={openDialog}
+        onClose={() => {
+          setOpenDialog(false);
+          setEditingCar(null);
+        }}
+        onSubmit={handleAddEdit}
+        initialData={editingCar}
+      />
+    </Container>
   );
 }
