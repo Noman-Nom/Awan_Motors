@@ -5,7 +5,7 @@ const pool = require('../db');
 // Get all cars
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM cars ORDER BY car_id');
+    const result = await pool.query('SELECT * FROM cars ORDER BY registration_no');
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);
@@ -28,16 +28,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-
-// Update car by ID
-router.put('/:id', async (req, res) => {
-  const { registration_no, model, status, remarks } = req.body;
+// Update car
+router.put('/:registration_no', async (req, res) => {
+  const { model, status, remarks } = req.body;
   try {
     const result = await pool.query(
-      `UPDATE cars 
-       SET registration_no=$1, model=$2, status=$3, remarks=$4 
-       WHERE car_id=$5 RETURNING *`,
-      [registration_no, model, status, remarks, req.params.id]
+      'UPDATE cars SET model=$1, status=$2, remarks=$3 WHERE registration_no=$4 RETURNING *',
+      [model, status, remarks, req.params.registration_no]
     );
 
     if (result.rows.length === 0) {
@@ -51,12 +48,12 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete car by ID
-router.delete('/:id', async (req, res) => {
+// Delete car
+router.delete('/:registration_no', async (req, res) => {
   try {
     const result = await pool.query(
-      'DELETE FROM cars WHERE car_id=$1 RETURNING *',
-      [req.params.id]
+      'DELETE FROM cars WHERE registration_no=$1 RETURNING *',
+      [req.params.registration_no]
     );
 
     if (result.rows.length === 0) {
@@ -70,6 +67,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-
 module.exports = router;
-    

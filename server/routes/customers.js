@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
-// Get all customers
+// ✅ Get all customers
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM customers ORDER BY customer_id');
@@ -13,14 +13,26 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Add a customer
+// ✅ Add a customer (with CNIC uniqueness check)
 router.post('/', async (req, res) => {
   const { name, cnic, mobile_no } = req.body;
+
   try {
+    // Check if CNIC already exists
+    const cnicCheck = await pool.query(
+      'SELECT customer_id FROM customers WHERE cnic=$1',
+      [cnic]
+    );
+
+    if (cnicCheck.rows.length > 0) {
+      return res.status(400).json({ error: 'CNIC already exists for another customer' });
+    }
+
     const result = await pool.query(
       'INSERT INTO customers (name, cnic, mobile_no) VALUES ($1, $2, $3) RETURNING *',
       [name, cnic, mobile_no]
     );
+
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err.message);
@@ -28,25 +40,30 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get single customer by ID
-router.get('/:id', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM customers WHERE customer_id = $1', [req.params.id]);
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
-
-// Update customer
-router.put('/:id', async (req, res) => {
+// ✅ Update customer (with CNIC uniqueness check)
+router.put('/:customer_id', async (req, res) => {
   const { name, cnic, mobile_no } = req.body;
+
   try {
+    // Check if CNIC belongs to another customer
+    const cnicCheck = await pool.query(
+      'SELECT customer_id FROM customers WHERE cnic=$1 AND customer_id<>$2',
+      [cnic, req.params.customer_id]
+    );
+
+    if (cnicCheck.rows.length > 0) {
+      return res.status(400).json({ error: 'CNIC already exists for another customer' });
+    }
+
     const result = await pool.query(
       'UPDATE customers SET name=$1, cnic=$2, mobile_no=$3 WHERE customer_id=$4 RETURNING *',
-      [name, cnic, mobile_no, req.params.id]
+      [name, cnic, mobile_no, req.params.customer_id]
     );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err.message);
@@ -54,11 +71,19 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete customer
-router.delete('/:id', async (req, res) => {
+// ✅ Delete customer
+router.delete('/:customer_id', async (req, res) => {
   try {
-    await pool.query('DELETE FROM customers WHERE customer_id = $1', [req.params.id]);
-    res.json({ message: 'Customer deleted successfully' });
+    const result = await pool.query(
+      'DELETE FROM customers WHERE customer_id=$1 RETURNING *',
+      [req.params.customer_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    res.json({ message: 'Customer deleted successfully', deletedCustomer: result.rows[0] });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
