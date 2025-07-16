@@ -1,7 +1,42 @@
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import Cars from "./pages/Cars";
+
 export default function App() {
   return (
-    <div className="text-3xl text-green-600 font-bold text-center mt-10">
-      ✅ Tailwind is Working!
-    </div>
+    <Router>
+      <div className="min-h-screen bg-gray-100">
+        <header className="bg-blue-700 text-white p-4">
+          <h1 className="text-2xl font-bold">Awan Motors – Rent A Car</h1>
+          <nav className="mt-2">
+            <Link
+              to="/"
+              className="mr-4 hover:underline"
+            >
+              Cars
+            </Link>
+            <Link
+              to="/customers"
+              className="mr-4 hover:underline"
+            >
+              Customers
+            </Link>
+            <Link
+              to="/bookings"
+              className="hover:underline"
+            >
+              Bookings
+            </Link>
+          </nav>
+        </header>
+
+        <main className="p-4">
+          <Routes>
+            <Route path="/" element={<Cars />} />
+            <Route path="/customers" element={<h2>Customers Page (Coming Soon)</h2>} />
+            <Route path="/bookings" element={<h2>Bookings Page (Coming Soon)</h2>} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
 }
