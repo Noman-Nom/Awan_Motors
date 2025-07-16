@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Cars from "./pages/Cars";
+import Customers from './pages/Customers';
+
 
 export default function App() {
   return (
@@ -32,7 +34,8 @@ export default function App() {
         <main className="p-4">
           <Routes>
             <Route path="/" element={<Cars />} />
-            <Route path="/customers" element={<h2>Customers Page (Coming Soon)</h2>} />
+          <Route path="/customers" element={<Customers />} />
+          
             <Route path="/bookings" element={<h2>Bookings Page (Coming Soon)</h2>} />
           </Routes>
         </main>
