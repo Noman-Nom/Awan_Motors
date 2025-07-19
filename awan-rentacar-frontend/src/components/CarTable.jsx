@@ -1,6 +1,7 @@
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Chip,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 export default function CarsTable({ cars, onEdit, onDelete }) {
   return (
@@ -18,9 +19,16 @@ export default function CarsTable({ cars, onEdit, onDelete }) {
         </TableHead>
         <TableBody>
           {cars.map((car, index) => (
-            <TableRow key={car.registration_no}>
+            <TableRow dkey={car.registration_no}>
               <TableCell>{index + 1}</TableCell>
-              <TableCell>{car.registration_no}</TableCell>
+             <TableCell>
+  <Link
+    to={`/cars/${car.registration_no}/bookings`}
+    style={{ color: '#1976d2', textDecoration: 'underline', cursor: 'pointer' }}
+  >
+    {car.registration_no}
+  </Link>
+</TableCell>
               <TableCell>{car.model}</TableCell>
               <TableCell>
                 <Chip

@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Cars from "./pages/Cars";
 import Customers from './pages/Customers';
 import Bookings from './pages/Bookings'; 
+import CarBookings from "./pages/CarBookings";
 
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/customers" element={<Customers />} />
           
            <Route path="/bookings" element={<Bookings />} />
+           <Route path="/cars/:registration_no/bookings" element={<CarBookings />} />
           </Routes>
         </main>
       </div>
