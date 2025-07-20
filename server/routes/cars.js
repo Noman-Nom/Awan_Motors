@@ -2,16 +2,30 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
-// Get all cars
+// Get all cars with dynamic status
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM cars ORDER BY registration_no');
+    const result = await pool.query(`
+      SELECT c.registration_no, c.model, c.remarks,
+        CASE 
+          WHEN EXISTS (
+            SELECT 1 FROM bookings b
+            WHERE b.registration_no = c.registration_no
+              AND CURRENT_DATE BETWEEN DATE(b.departure_time) AND DATE(b.arrival_time)
+          )
+          THEN 'Booked'
+          ELSE 'Available'
+        END AS status
+      FROM cars c
+      ORDER BY c.registration_no;
+    `);
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 });
+
 
 // Add a car
 router.post('/', async (req, res) => {
