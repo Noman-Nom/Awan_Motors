@@ -1,25 +1,50 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { getCustomers } from '../api/customers';
 import { useState, useEffect } from 'react';
-import { getBookings } from '../api/bookings';
-import BookingsTable from '../components/BookingsTable';
 import { Container, Typography, Button, Box } from '@mui/material';
+import { getBookings, addBooking, updateBooking, deleteBooking } from '../api/bookings';
+import BookingDialog from '../components/BookingDialog';
+import BookingsTable from '../components/BookingsTable';
 
 export default function CarBookings() {
   const { registration_no } = useParams();
-  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editingBooking, setEditingBooking] = useState(null);
 
-  const fetchBookings = async () => {
+  const fetchData = async () => {
     const allBookings = await getBookings();
     const carBookings = allBookings.filter(
       (b) => b.registration_no === registration_no
     );
     setBookings(carBookings);
+
+    const allCustomers = await getCustomers();
+    setCustomers(allCustomers);
   };
 
   useEffect(() => {
-    fetchBookings();
+    fetchData();
   }, [registration_no]);
+
+  const handleAddEdit = async (booking) => {
+    if (editingBooking) {
+      await updateBooking(editingBooking.booking_id, booking);
+    } else {
+      await addBooking(booking);
+    }
+    fetchData();
+    setOpenDialog(false);
+    setEditingBooking(null);
+  };
+
+  const handleDelete = async (booking_id) => {
+    if (window.confirm('Are you sure you want to delete this booking?')) {
+      await deleteBooking(booking_id);
+      fetchData();
+    }
+  };
 
   return (
     <Container>
@@ -30,7 +55,7 @@ export default function CarBookings() {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => navigate('/bookings', { state: { prefillCar: registration_no } })}
+          onClick={() => setOpenDialog(true)}
         >
           + New Booking for {registration_no}
         </Button>
@@ -39,12 +64,27 @@ export default function CarBookings() {
       {bookings.length ? (
         <BookingsTable
           bookings={bookings}
-          onEdit={() => {}}
-          onDelete={() => {}}
+          onEdit={(booking) => {
+            setEditingBooking(booking);
+            setOpenDialog(true);
+          }}
+          onDelete={handleDelete}
         />
       ) : (
         <Typography>No previous bookings for this car.</Typography>
       )}
+
+      <BookingDialog
+        open={openDialog}
+        onClose={() => {
+          setOpenDialog(false);
+          setEditingBooking(null);
+        }}
+        onSubmit={handleAddEdit}
+        initialData={editingBooking}
+        prefillCar={registration_no}
+        customers={customers} // 👈 Pass customers here
+      />
     </Container>
   );
 }

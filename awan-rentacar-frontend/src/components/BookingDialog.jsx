@@ -4,9 +4,9 @@ import {
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 
-export default function BookingDialog({ open, onClose, onSubmit, initialData, cars, customers }) {
+export default function BookingDialog({ open, onClose, onSubmit, initialData, prefillCar, customers = [] }) {
   const [form, setForm] = useState({
-    registration_no: '',
+    registration_no: prefillCar || '',
     customer_id: '',
     reference_name: '',
     reference_mobile: '',
@@ -19,8 +19,12 @@ export default function BookingDialog({ open, onClose, onSubmit, initialData, ca
   });
 
   useEffect(() => {
-    if (initialData) setForm(initialData);
-  }, [initialData]);
+    if (initialData) {
+      setForm(initialData);
+    } else if (prefillCar) {
+      setForm((prev) => ({ ...prev, registration_no: prefillCar }));
+    }
+  }, [initialData, prefillCar]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -33,25 +37,10 @@ export default function BookingDialog({ open, onClose, onSubmit, initialData, ca
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{initialData ? 'Edit Booking' : 'Add Booking'}</DialogTitle>
+      <DialogTitle>{initialData ? 'Edit Booking' : `Add Booking for ${prefillCar}`}</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} mt={1}>
-            <TextField
-              select
-              label="Car (Registration No)"
-              name="registration_no"
-              value={form.registration_no}
-              onChange={handleChange}
-              required
-            >
-              {cars.map((car) => (
-                <MenuItem key={car.registration_no} value={car.registration_no}>
-                  {car.registration_no} - {car.model}
-                </MenuItem>
-              ))}
-            </TextField>
-
             <TextField
               select
               label="Customer"
@@ -60,11 +49,15 @@ export default function BookingDialog({ open, onClose, onSubmit, initialData, ca
               onChange={handleChange}
               required
             >
-              {customers.map((cust) => (
-                <MenuItem key={cust.customer_id} value={cust.customer_id}>
-                  {cust.name} ({cust.cnic})
-                </MenuItem>
-              ))}
+              {customers.length > 0 ? (
+                customers.map((cust) => (
+                  <MenuItem key={cust.customer_id} value={cust.customer_id}>
+                    {cust.name} ({cust.cnic})
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>No customers available</MenuItem>
+              )}
             </TextField>
 
             <TextField
