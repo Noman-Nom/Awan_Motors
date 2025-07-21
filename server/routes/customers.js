@@ -90,4 +90,29 @@ router.delete('/:customer_id', async (req, res) => {
   }
 });
 
+router.get('/:customer_id/bookings', async (req, res) => {
+  try {
+    const customerId = parseInt(req.params.customer_id);
+    if (isNaN(customerId)) {
+      return res.status(400).json({ error: 'Invalid customer ID' });
+    }
+
+    const result = await pool.query(
+      `SELECT b.*, c.model
+       FROM bookings b
+       JOIN cars c ON b.registration_no = c.registration_no
+       WHERE b.customer_id = $1
+       ORDER BY b.departure_time DESC`,
+      [customerId]
+    );
+
+    // Always return JSON
+    res.json(result.rows || []);
+  } catch (err) {
+    console.error('Error fetching customer bookings:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
 module.exports = router;
