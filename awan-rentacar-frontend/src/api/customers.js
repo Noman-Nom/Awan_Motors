@@ -1,10 +1,21 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = 'http://localhost:5000/api/customers';
+const API_URL = "http://localhost:5000/api/customers";
 
 export const getCustomers = async () => (await axios.get(API_URL)).data;
-export const addCustomer = async (customer) => (await axios.post(API_URL, customer)).data;
+export const addCustomer = async (customer) =>
+  (await axios.post(API_URL, customer)).data;
 export const updateCustomer = async (customer_id, customer) =>
   (await axios.put(`${API_URL}/${customer_id}`, customer)).data;
 export const deleteCustomer = async (customer_id) =>
   (await axios.delete(`${API_URL}/${customer_id}`)).data;
+
+export const getCustomerBookings = async (customer_id) => {
+  try {
+    const res = await axios.get(`${API_URL}/${customer_id}/bookings`);
+    return res.data;
+  } catch (err) {
+    console.error('Error fetching customer bookings:', err);
+    return [];
+  }
+};

@@ -1,6 +1,7 @@
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 export default function CustomersTable({ customers, onEdit, onDelete }) {
   return (
@@ -19,7 +20,11 @@ export default function CustomersTable({ customers, onEdit, onDelete }) {
           {customers.map((customer, index) => (
             <TableRow key={customer.customer_id}>
               <TableCell>{index + 1}</TableCell>
-              <TableCell>{customer.name}</TableCell>
+              <TableCell>
+                <Link to={`/customers/${customer.customer_id}`} style={{ textDecoration: 'none', color: '#1976d2' }}>
+                  {customer.name}
+                </Link>
+              </TableCell>
               <TableCell>{customer.cnic}</TableCell>
               <TableCell>{customer.mobile_no}</TableCell>
               <TableCell>

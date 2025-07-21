@@ -3,6 +3,7 @@ import Cars from "./pages/Cars";
 import Customers from './pages/Customers';
 import Bookings from './pages/Bookings'; 
 import CarBookings from "./pages/CarBookings";
+import CustomerDetail from "./components/CustomerDetail";
 
 
 export default function App() {
@@ -40,6 +41,8 @@ export default function App() {
           
            <Route path="/bookings" element={<Bookings />} />
            <Route path="/cars/:registration_no/bookings" element={<CarBookings />} />
+           <Route path="/customers/:customer_id" element={<CustomerDetail />} />
+
           </Routes>
         </main>
       </div>
